@@ -15,7 +15,7 @@ namespace WeAreArchitect\SharePoint;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\TransferException;
-use GuzzleHttp\Message\ResponseInterface;
+use GuzzleHttp\Psr7\Response;
 
 class SPSite implements SPRequesterInterface
 {
@@ -78,8 +78,10 @@ class SPSite implements SPRequesterInterface
      * SharePoint Site constructor
      *
      * @access  public
-     * @param   \GuzzleHttp\Client $http   Guzzle HTTP client
+     *
+     * @param   \GuzzleHttp\Client $http Guzzle HTTP client
      * @param   array              $config SharePoint Site configuration
+     *
      * @throws  SPException
      * @return  SPSite
      */
@@ -95,12 +97,12 @@ class SPSite implements SPRequesterInterface
         // set Site Hostname and Path
         $components = parse_url($this->http->getBaseUrl());
 
-        if (! isset($components['scheme'], $components['host'], $components['path'])) {
+        if (!isset($components['scheme'], $components['host'], $components['path'])) {
             throw new SPException('The SharePoint Site URL is invalid');
         }
 
-        $this->hostname = $components['scheme'].'://'.$components['host'];
-        $this->path = rtrim($components['path'], '/');
+        $this->hostname = $components['scheme'] . '://' . $components['host'];
+        $this->path     = rtrim($components['path'], '/');
     }
 
     /**
@@ -118,7 +120,9 @@ class SPSite implements SPRequesterInterface
      * Get SharePoint Site Hostname
      *
      * @access  public
+     *
      * @param   string $path Path to append
+     *
      * @return  string
      */
     public function getHostname($path = null)
@@ -130,7 +134,9 @@ class SPSite implements SPRequesterInterface
      * Get SharePoint Site Path
      *
      * @access  public
+     *
      * @param   string $path Path to append
+     *
      * @return  string
      */
     public function getPath($path = null)
@@ -142,7 +148,9 @@ class SPSite implements SPRequesterInterface
      * Get SharePoint Site URL
      *
      * @access  public
+     *
      * @param   string $path Path to append
+     *
      * @return  string
      */
     public function getUrl($path = null)
@@ -166,8 +174,10 @@ class SPSite implements SPRequesterInterface
      *
      * @static
      * @access  public
-     * @param   string $url      SharePoint Site URL
+     *
+     * @param   string $url SharePoint Site URL
      * @param   array  $settings Instantiation settings
+     *
      * @return  SPSite
      */
     public static function create($url, array $settings = [])
@@ -193,14 +203,16 @@ class SPSite implements SPRequesterInterface
      * Parse the SharePoint API response
      *
      * @access  protected
-     * @param   \GuzzleHttp\Message\ResponseInterface $response
+     *
+     * @param   GuzzleHttp\Psr7\Response;
+     *
      * @throws  SPException
      * @return  array
      */
-    protected function parseResponse(ResponseInterface $response)
+    protected function parseResponse(Response $response)
     {
         $httpStatus = $response->getStatusCode();
-        $json = json_decode($response->getBody(), true);
+        $json       = json_decode($response->getBody()->getContents(), true);
 
         if ($httpStatus >= 400) {
             $message = null;
@@ -243,7 +255,7 @@ class SPSite implements SPRequesterInterface
                 'exceptions' => false, // avoid throwing exceptions when we get HTTP errors (4XX, 5XX)
             ]);
 
-            $response = $this->http->send($this->http->createRequest($method, $url, $options));
+            $response = $this->http->request($method, $url, $options);
 
             return $json ? $this->parseResponse($response) : $response;
         } catch (TransferException $e) {
@@ -255,8 +267,10 @@ class SPSite implements SPRequesterInterface
      * Create SharePoint Access Token
      *
      * @access  public
+     *
      * @param   string $contextToken SharePoint Context Token
-     * @param   array  $extra        Extra SharePoint Access Token properties to map
+     * @param   array  $extra Extra SharePoint Access Token properties to map
+     *
      * @throws  SPException
      * @return  SPSite
      */
@@ -276,7 +290,7 @@ class SPSite implements SPRequesterInterface
      */
     public function getSPAccessToken()
     {
-        if (! $this->token instanceof SPAccessToken) {
+        if (!$this->token instanceof SPAccessToken) {
             throw new SPException('Invalid SharePoint Access Token');
         }
 
@@ -291,7 +305,9 @@ class SPSite implements SPRequesterInterface
      * Set the SharePoint Access Token
      *
      * @access  public
+     *
      * @param   SPAccessToken $token SharePoint Access Token
+     *
      * @throws  SPException
      * @return  void
      */
@@ -308,7 +324,9 @@ class SPSite implements SPRequesterInterface
      * Create a SharePoint Form Digest
      *
      * @access  public
-     * @param   array  $extra Extra SharePoint Access Token properties to map
+     *
+     * @param   array $extra Extra SharePoint Access Token properties to map
+     *
      * @throws  SPException
      * @return  SPSite
      */
@@ -324,7 +342,7 @@ class SPSite implements SPRequesterInterface
      */
     public function getSPFormDigest()
     {
-        if (! $this->digest instanceof SPFormDigest) {
+        if (!$this->digest instanceof SPFormDigest) {
             throw new SPException('Invalid SharePoint Form Digest');
         }
 
@@ -339,7 +357,9 @@ class SPSite implements SPRequesterInterface
      * Set the SharePoint Form Digest
      *
      * @access  public
+     *
      * @param   SPFormDigest $digest SharePoint Form Digest
+     *
      * @throws  SPException
      * @return  void
      */
