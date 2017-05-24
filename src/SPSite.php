@@ -95,14 +95,11 @@ class SPSite implements SPRequesterInterface
         $this->http = $http;
 
         // set Site Hostname and Path
-        $components = parse_url($this->http->getBaseUrl());
+        $config  = $http->getConfig();
+        $baseUri = $config['base_uri'];
 
-        if (!isset($components['scheme'], $components['host'], $components['path'])) {
-            throw new SPException('The SharePoint Site URL is invalid');
-        }
-
-        $this->hostname = $components['scheme'] . '://' . $components['host'];
-        $this->path     = rtrim($components['path'], '/');
+        $this->hostname = $baseUri->getScheme() . '://' . $baseUri->getHost();
+        $this->path     = rtrim($baseUri->getPath(), '/');
     }
 
     /**
@@ -190,7 +187,7 @@ class SPSite implements SPRequesterInterface
         $settings = array_replace_recursive($settings, [
             'site' => [], // SharePoint Site configuration
             'http' => [   // Guzzle HTTP Client configuration
-                'base_url' => $url,
+                'base_uri' => $url,
             ],
         ]);
 
